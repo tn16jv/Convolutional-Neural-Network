@@ -9,6 +9,7 @@
 #include "utilityIO.h"
 
 #include <iostream>
+#include <random>       // normal distribution random
 #include <stdio.h>      // null, and I/O
 #include <stdlib.h>     // for srand, rand
 #include <time.h>
@@ -62,7 +63,7 @@ public:
 
         images.push_back(anImage);
 
-        initializeFilter();
+        initializeWeights();
     }
 
     /*
@@ -80,7 +81,7 @@ public:
 
         images = seriesImage;
 
-        initializeFilter();
+        initializeWeights();
     }
 
     ~ConvulutionalNeuralNetwork() {
@@ -91,20 +92,27 @@ public:
      * This method is for the beginning of training. It sets the weights before the Hidden Layer to a certain pattern
      * and the ones after the Hidden Layer to a random pattern.
      */
-    void initializeFilter() {
-        vector<vector<double> > aFilter(3);
-        for (int i=0; i<3; i++) {
-            vector<double> row(3);
-            for (int j=0; j<3; j++) {
-                row[j] = randDouble(-6, 6);
+    void initializeWeights() {
+        //std::default_random_engine generator;
+        std::random_device rd{};
+        std::mt19937 gen{rd()};
+        std::normal_distribution<double> distribution(0.0,2.0); // mean at 0, standard deviation is 2
+
+        int n = images[0].size() - 1;
+        vector<vector<double> > aFilter(n);
+        for (int i=0; i<n; i++) {
+            vector<double> row(n);
+            for (int j=0; j<n; j++) {
+                //row[j] = randDouble(-6, 6);
+                row[j] = distribution(gen);     // randomly sample values from above normal distribution
             }
             aFilter[i] = row;
         }
         initialWeights = aFilter;
 
-        vector<double> secondFilter(3*3);
-        for (int i=0; i<3*3; i++) {
-            secondFilter[i] = randDouble(-6, 6);
+        vector<double> secondFilter(n*n);
+        for (int i=0; i<n*n; i++) {
+            secondFilter[i] = distribution(gen);    // randomly sample values from above normal distribution
         }
         finalWeights = secondFilter;
         //finalWeights = flatten2D(rotateVector(initialWeights));
@@ -137,8 +145,20 @@ public:
     }
 
     void train() {
-        for (int k=0; k<imageCount; k++) {
-            for (int i = 0; i < epoch; i++) {
+        vector<vector<double> > edge = read2DVector("edge3");
+        int runtest = 1;
+        if (runtest > 0) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    cout << edge[i][j] << " ";
+                }
+                cout << endl;
+            }
+            cout << endl;
+        }
+
+        for (int i = 0; i < epoch; i++) {
+            for (int k=0; k<imageCount; k++) {
                 // Applies convolution to the image with the filter, then clamps the values between (-1,1) with tanh
                 vector<vector<double> > layer1 = convolve2D(images[k], initialWeights);
                 vector<double> layer1Vec = flatten2D(layer1);

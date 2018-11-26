@@ -36,5 +36,6 @@ int main() {
     cout<<"Testing an X image that is slightly off:"<<endl;
     vector<vector<double> > anotherImage = read2DVector("XtestAfter.txt");
     cout<<neural.testAnImage(anotherImage)<<endl;
+    neural.saveWeights("preHiddenWeights.txt", "postHiddenWeights.txt");
     return 0;
 }
