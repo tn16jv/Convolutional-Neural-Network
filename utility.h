@@ -35,3 +35,5 @@ vector<vector<double> > funcOnVector2D(double (*f)(double), vector<vector<double
 vector<double> flatten2D (vector<vector<double> > elements);
 
 vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<double> > filter);
+
+vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vector<double> > filter);

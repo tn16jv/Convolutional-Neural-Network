@@ -193,3 +193,42 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
     return toReturn;
 }
 
+/*
+ * Acts like convolve2D() but the image is not reduced in size. Instead, it is padded by zeros.
+ * Was made into a separate function for clarity purposes.
+ */
+vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vector<double> > filter) {
+    int imageY = image.size();
+    int imageX = image[0].size();
+    int filterY = filter.size();
+    int filterX = filter[0].size();
+
+    int padY = (filterY - 1) / 2;
+    int padX = (filterX - 1) / 2;
+    double result[imageY][imageX];
+
+    double product;
+    for (int i=0; i<imageY; i++) {
+        for (int j=0; j<imageX; j++) {
+            product = 0;
+            bool toPad = i < padY || i >= (imageY - padY) || j < padX || j >=(imageX - padX);
+            // If we are not in the borders to pad with 0, we perform convolution normally.
+            if (!toPad) {
+                for (int l = 0; l < filterY; l++) {     // these loops are the multiplication of the filter on the image
+                    for (int k = 0; k < filterX; k++) {
+                        product += image[i + l - padY][j + k - padX] * filter[l][k];
+                    }
+                }
+            }
+            result[i][j] = product;
+        }
+    }
+    vector<vector<double> > toReturn(imageY);       // empty vector created to copy the primitive 2D result array
+    for (int i=0; i<imageY; i++) {
+        double* thing = result[i];      // pointer to a row from the primitive 2D result array
+        vector<double> something(thing, thing+imageY);
+        toReturn[i] = something;
+    }
+    return toReturn;
+}
+

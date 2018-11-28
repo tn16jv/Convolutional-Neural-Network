@@ -37,5 +37,41 @@ int main() {
     vector<vector<double> > anotherImage = read2DVector("XtestAfter.txt");
     cout<<neural.testAnImage(anotherImage)<<endl;
     neural.saveWeights("preHiddenWeights.txt", "postHiddenWeights.txt");
+
+    vector<vector<double> > picture = read2DVector("four.txt");
+    vector<vector<double> > filter = read2DVector("identity");
+    vector<vector<double> > result1 = convolve2D(picture, filter);
+    vector<vector<double> > result2 = convolve2Dpad(picture, filter);
+    result2 = convolve2Dpad(picture, filter);
+
+    for (int i=0; i<picture.size(); i++) {
+        for (int j=0; j<picture[0].size(); j++) {
+            cout<<picture[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<endl;
+
+    for (int i=0; i<filter.size(); i++) {
+        for (int j=0; j<filter[0].size(); j++) {
+            cout<<filter[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<endl;
+
+    for (int i=0; i<result1.size(); i++) {
+        for (int j=0; j<result1[0].size(); j++) {
+            std::cout<<result1[i][j]<<" ";
+        }
+        std::cout<<std::endl;
+    }
+    cout<<endl<<endl;
+    for (int i=0; i<result2.size(); i++) {
+        for (int j=0; j<result2[0].size(); j++) {
+            std::cout<<result2[i][j]<<" ";
+        }
+        std::cout<<std::endl;
+    }
     return 0;
 }

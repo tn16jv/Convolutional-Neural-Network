@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <random>       // normal distribution random
+#include <chrono>
 #include <stdio.h>      // null, and I/O
 #include <stdlib.h>     // for srand, rand
 #include <time.h>
@@ -94,8 +95,9 @@ public:
      */
     void initializeWeights() {
         //std::default_random_engine generator;
-        std::random_device rd{};
-        std::mt19937 gen{rd()};
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        //std::random_device rd{};
+        std::mt19937 gen{seed};
         std::normal_distribution<double> distribution(0.0,2.0); // mean at 0, standard deviation is 2
 
         int n = images[0].size() - 1;
@@ -145,18 +147,6 @@ public:
     }
 
     void train() {
-        vector<vector<double> > edge = read2DVector("edge3");
-        int runtest = 1;
-        if (runtest > 0) {
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    cout << edge[i][j] << " ";
-                }
-                cout << endl;
-            }
-            cout << endl;
-        }
-
         for (int i = 0; i < epoch; i++) {
             for (int k=0; k<imageCount; k++) {
                 // Applies convolution to the image with the filter, then clamps the values between (-1,1) with tanh
