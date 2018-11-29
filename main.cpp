@@ -1,5 +1,6 @@
 #include <iostream>
 #include <assert.h>
+#include <chrono>
 #include <vector>
 #include <cmath>
 #include "utility.h"
@@ -7,8 +8,12 @@
 #include "ConvulutionalNeuralNetwork.h"
 
 using namespace std;
+using namespace std::chrono;
 
 int main() {
+    std::chrono::time_point<std::chrono::system_clock> t1;
+    std::chrono::time_point<std::chrono::system_clock> t2;
+    int duration;
     /*
      * This example will train the neural network to try and recognize images of X. This will be like a grayscale image
      * where 0 is white, and 1 and above is colored in.
@@ -23,7 +28,26 @@ int main() {
     expects[1] = 0.7;
     expects[2] = 0.5;
     ConvulutionalNeuralNetwork neural = ConvulutionalNeuralNetwork(images, expects);
+
+    t1 = std::chrono::system_clock::now();
     neural.train();
+    t2 = std::chrono::system_clock::now();
+    duration = duration_cast<microseconds>(t2 - t1).count();
+    cout<<"Full training was "<<duration<<" microseconds"<<endl;
+
+    vector<vector<double> > picture = read2DVector("bigExample2");
+    vector<vector<double> > filter = read2DVector("identity");
+    t1 = std::chrono::system_clock::now();
+    convolve2D(picture, filter);
+    t2 = std::chrono::system_clock::now();
+    duration = duration_cast<microseconds>(t2 - t1).count();
+    cout<<"Sequential convolution was "<<duration<<" microseconds"<<endl;
+
+    t1 = std::chrono::system_clock::now();
+    convolve2Dparallel(picture, filter);
+    t2 = std::chrono::system_clock::now();
+    duration = duration_cast<microseconds>(t2 - t1).count();
+    cout<<"Parallel convolution was "<<duration<<" microseconds"<<endl;
 
     cout<<"Output layer at the end of training: "<<endl;
     vector<double> output = neural.outputLayer();

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdio.h>      // null, and I/O
 #include <stdlib.h>     // for srand, rand
+#include <omp.h>        // for OpenMP parallelization
 
 using namespace std;
 
@@ -173,17 +174,57 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
     double result[resultY][resultX];
 
     double product;
-    for (int i=0; i<resultY; i++) {     // loop that builds the result rows
-        for (int j=0; j<resultX; j++) {     // loop that builds the result columns
+    int i, j;
+#pragma omp parallel num_threads(4)
+    {
+        # pragma omp for private(i, j) schedule(static)
+        for (int a = 0; a < resultY * resultX; a++) {     // loop that builds the result rows and columns
+            i = a / resultX;
+            j = a % resultX;
             product = 0;
-            for (int l=0; l<filterY; l++) {     // these 2 nested loops is the multiplication of the filter on the image
-                for (int k=0; k<filterX; k++) {
-                    product += image[i+l][j+k] * filter[l][k];
+            for (int l = 0;
+                 l < filterY; l++) {     // these 2 nested loops is the multiplication of the filter on the image
+                for (int k = 0; k < filterX; k++) {
+                    product += image[i + l][j + k] * filter[l][k];
                 }
             }
             result[i][j] = product;
         }
     }
+    vector<vector<double> > toReturn(resultY);       // empty vector created to copy the primitive 2D result array
+    for (int i=0; i<resultY; i++) {
+        double* thing = result[i];      // pointer to a row from the primitive 2D result array
+        vector<double> something(thing, thing+resultX);
+        toReturn[i] = something;
+    }
+    return toReturn;
+}
+
+vector<vector<double> > convolve2Dparallel(vector<vector<double> > image, vector<vector<double> > filter) {
+    int imageY = image.size();
+    int imageX = image[0].size();
+    int filterY = filter.size();
+    int filterX = filter[0].size();
+
+    int resultY = imageY - (filterY - 1);   // convoluted result is shorter by 1 minus filter length
+    int resultX = imageX - (filterX - 1);
+    double result[resultY][resultX];
+
+    double product;
+    int i, j;
+    int threads = 4;
+    for (int a=0; a<resultY*resultX; a++) {
+        i = a/resultX;
+        j = a%resultX;
+        product = 0;
+        for (int l=0; l<filterY; l++) {     // these 2 nested loops is the multiplication of the filter on the image
+            for (int k=0; k<filterX; k++) {
+                product += image[i+l][j+k] * filter[l][k];
+            }
+        }
+        result[i][j] = product;
+    }
+
     vector<vector<double> > toReturn(resultY);       // empty vector created to copy the primitive 2D result array
     for (int i=0; i<resultY; i++) {
         double* thing = result[i];      // pointer to a row from the primitive 2D result array
