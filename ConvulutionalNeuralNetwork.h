@@ -101,22 +101,19 @@ public:
         std::normal_distribution<double> distribution(0.0,2.0); // mean at 0, standard deviation is 2
 
         int n = images[0].size() - 1;
-        vector<vector<double> > aFilter(n);
+        initialWeights.resize(n);
         for (int i=0; i<n; i++) {
-            vector<double> row(n);
+            initialWeights[i] = vector<double>(n);
             for (int j=0; j<n; j++) {
                 //row[j] = randDouble(-6, 6);
-                row[j] = distribution(gen);     // randomly sample values from above normal distribution
+                initialWeights[i][j] = distribution(gen);     // randomly sample values from above normal distribution
             }
-            aFilter[i] = row;
         }
-        initialWeights = aFilter;
 
-        vector<double> secondFilter(n*n);
+        finalWeights.resize(n*n);
         for (int i=0; i<n*n; i++) {
-            secondFilter[i] = distribution(gen);    // randomly sample values from above normal distribution
+            finalWeights[i] = distribution(gen);    // randomly sample values from above normal distribution
         }
-        finalWeights = secondFilter;
         //finalWeights = flatten2D(rotateVector(initialWeights));
     }
 
@@ -128,29 +125,38 @@ public:
     void adaptWeights(vector<vector<double> > grad1, vector<double> grad2) {
         int initialY = initialWeights.size();
         int initialX = initialWeights[0].size();
-        vector<vector<double> > newInitial(initialWeights.size());
         for (int i=0; i<initialY; i++) {    // iterate across the n x n vector of initial weights
-            vector<double> row(initialX);
             for (int j=0; j<initialX; j++) {
-                row[j] = initialWeights[i][j] - grad1[i][j] * learningRate;
+                double tmp = initialWeights[i][j];
+                initialWeights[i][j] = tmp - grad1[i][j] * learningRate;
             }
-            newInitial[i] = row;
         }
-        initialWeights = newInitial;
 
         int finalLength = finalWeights.size();
-        vector<double> newFinal(finalLength);
         for (int i=0; i<finalLength; i++) {     // iterate across the 1D vector of final weights
-            newFinal[i] = finalWeights[i] - grad2[i] * learningRate;
+            double tmp = finalWeights[i];
+            finalWeights[i] = tmp - grad2[i] * learningRate;
         }
-        finalWeights = newFinal;
     }
 
     void train() {
+        vector<vector<double> > theFilter = read2DVector("identity");
+        vector<vector<double> > filter2 = read2DVector("edge1");
+        vector<vector<double> > filter3 = read2DVector("edge2");
+        vector<vector<double> > filter4 = read2DVector("edge3");
+        vector<vector<double> > filter5 = read2DVector("sharpen");
+        vector<vector<double> > filter6 = read2DVector("guassBlur");
+
         for (int i = 0; i < epoch; i++) {
             for (int k=0; k<imageCount; k++) {
                 // Applies convolution to the image with the filter, then clamps the values between (-1,1) with tanh
-                vector<vector<double> > layer1 = convolve2D(images[k], initialWeights);
+                vector<vector<double> > image = convolve2Dpad(images[k], filter2);
+                image = convolve2Dpad(image, filter3);
+                image = convolve2Dpad(image, filter4);
+                image = convolve2Dpad(image, filter5);
+                image = convolve2Dpad(image, filter6);
+
+                vector<vector<double> > layer1 = convolve2D(image, initialWeights);
                 vector<double> layer1Vec = flatten2D(layer1);
                 vector<double> layer1ActVec = funcOnVector(tanh, layer1Vec);
 
@@ -170,7 +176,7 @@ public:
 
                 vector<double> gradient1a = dotProduct(finalWeights, gradient2a * gradient2b);
                 vector<vector<double> > gradient1b = funcOnVector2D(dtanh, layer1);
-                vector<vector<double> > gradient1c = images[k];
+                vector<vector<double> > gradient1c = image;
 
                 vector<vector<double> > gradient1Tmp = multiplyVectors(gradient1b, gradient1a);
                 vector<vector<double> > gradient1 = rotateVector(

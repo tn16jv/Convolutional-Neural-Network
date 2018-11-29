@@ -14,9 +14,9 @@ int main() {
      * where 0 is white, and 1 and above is colored in.
      */
     vector<vector<vector<double> > > images (3);
-    images[0] = read2DVector("Xpic.txt");       // the actual X image
-    images[1] = read2DVector("Xpic2.txt");      // half of the X (bad image)
-    images[2] = read2DVector("emptyX.txt");     // empty image
+    images[0] = read2DVector("four.txt");       // the actual X image
+    images[1] = read2DVector("badFour.txt");      // half of the X (bad image)
+    images[2] = read2DVector("empty.txt");     // empty image
 
     vector<double> expects (3);
     expects[0] = 1.0;
@@ -32,7 +32,7 @@ int main() {
     }
     std::cout<<endl;
 
-
+/*
     cout<<"Testing an X image that is slightly off:"<<endl;
     vector<vector<double> > anotherImage = read2DVector("XtestAfter.txt");
     cout<<neural.testAnImage(anotherImage)<<endl;
@@ -43,7 +43,8 @@ int main() {
     vector<vector<double> > result1 = convolve2D(picture, filter);
     vector<vector<double> > result2 = convolve2Dpad(picture, filter);
     result2 = convolve2Dpad(picture, filter);
-
+    */
+/*
     for (int i=0; i<picture.size(); i++) {
         for (int j=0; j<picture[0].size(); j++) {
             cout<<picture[i][j]<<" ";
@@ -73,5 +74,6 @@ int main() {
         }
         std::cout<<std::endl;
     }
+    */
     return 0;
 }
