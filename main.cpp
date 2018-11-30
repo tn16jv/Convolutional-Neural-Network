@@ -41,13 +41,13 @@ int main() {
     convolve2D(picture, filter);
     t2 = std::chrono::system_clock::now();
     duration = duration_cast<microseconds>(t2 - t1).count();
-    cout<<"Sequential convolution was "<<duration<<" microseconds"<<endl;
+    cout<<"Parallel convolution was "<<duration<<" microseconds"<<endl;
 
     t1 = std::chrono::system_clock::now();
-    convolve2Dparallel(picture, filter);
+    convolve2Dsequential(picture, filter);
     t2 = std::chrono::system_clock::now();
     duration = duration_cast<microseconds>(t2 - t1).count();
-    cout<<"Parallel convolution was "<<duration<<" microseconds"<<endl;
+    cout<<"Sequential convolution was "<<duration<<" microseconds"<<endl;
 
     cout<<"Output layer at the end of training: "<<endl;
     vector<double> output = neural.outputLayer();

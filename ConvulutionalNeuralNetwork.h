@@ -140,7 +140,7 @@ public:
     }
 
     void train() {
-        vector<vector<double> > theFilter = read2DVector("identity");
+        vector<vector<double> > filter1 = read2DVector("identity");
         vector<vector<double> > filter2 = read2DVector("edge1");
         vector<vector<double> > filter3 = read2DVector("edge2");
         vector<vector<double> > filter4 = read2DVector("edge3");
@@ -149,13 +149,11 @@ public:
 
         for (int i = 0; i < epoch; i++) {
             for (int k=0; k<imageCount; k++) {
-                // Applies convolution to the image with the filter, then clamps the values between (-1,1) with tanh
-                vector<vector<double> > image = convolve2Dpad(images[k], filter2);
-                image = convolve2Dpad(image, filter3);
-                image = convolve2Dpad(image, filter4);
+                // Applies convolution to the image with the filter
+                vector<vector<double> > image = convolve2Dpad(images[k], filter1);
                 image = convolve2Dpad(image, filter5);
-                image = convolve2Dpad(image, filter6);
 
+                // Applies the function (sigmoid tanh) onto the neurons
                 vector<vector<double> > layer1 = convolve2D(image, initialWeights);
                 vector<double> layer1Vec = flatten2D(layer1);
                 vector<double> layer1ActVec = funcOnVector(tanh, layer1Vec);

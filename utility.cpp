@@ -175,15 +175,15 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
 
     double product;
     int i, j;
-#pragma omp parallel num_threads(4)
+    int threads = 4;
+    #pragma omp parallel num_threads(threads) shared(resultY, resultX, result)
     {
-        # pragma omp for private(i, j) schedule(static)
+        # pragma omp for private(i, j, product) schedule(dynamic, resultX)
         for (int a = 0; a < resultY * resultX; a++) {     // loop that builds the result rows and columns
             i = a / resultX;
             j = a % resultX;
             product = 0;
-            for (int l = 0;
-                 l < filterY; l++) {     // these 2 nested loops is the multiplication of the filter on the image
+            for (int l = 0; l < filterY; l++) {     // apply filter to area
                 for (int k = 0; k < filterX; k++) {
                     product += image[i + l][j + k] * filter[l][k];
                 }
@@ -200,7 +200,7 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
     return toReturn;
 }
 
-vector<vector<double> > convolve2Dparallel(vector<vector<double> > image, vector<vector<double> > filter) {
+vector<vector<double> > convolve2Dsequential(vector<vector<double> > image, vector<vector<double> > filter) {
     int imageY = image.size();
     int imageX = image[0].size();
     int filterY = filter.size();
@@ -211,18 +211,16 @@ vector<vector<double> > convolve2Dparallel(vector<vector<double> > image, vector
     double result[resultY][resultX];
 
     double product;
-    int i, j;
-    int threads = 4;
-    for (int a=0; a<resultY*resultX; a++) {
-        i = a/resultX;
-        j = a%resultX;
-        product = 0;
-        for (int l=0; l<filterY; l++) {     // these 2 nested loops is the multiplication of the filter on the image
-            for (int k=0; k<filterX; k++) {
-                product += image[i+l][j+k] * filter[l][k];
+    for (int i=0; i<resultY; i++) {     // loop that builds the result rows
+        for (int j=0; j<resultX; j++) {     // loop that builds the result columns
+            product = 0;
+            for (int l=0; l<filterY; l++) {     // these 2 nested loops is the multiplication of the filter on the image
+                for (int k=0; k<filterX; k++) {
+                    product += image[i+l][j+k] * filter[l][k];
+                }
             }
+            result[i][j] = product;
         }
-        result[i][j] = product;
     }
 
     vector<vector<double> > toReturn(resultY);       // empty vector created to copy the primitive 2D result array
