@@ -38,4 +38,4 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
 
 vector<vector<double> > convolve2Dsequential(vector<vector<double> > image, vector<vector<double> > filter);
 
-vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vector<double> > filter);
+vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vector<double> > filter, int cores);

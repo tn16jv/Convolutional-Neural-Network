@@ -151,8 +151,8 @@ public:
         for (int i = 0; i < epoch; i++) {
             for (int k=0; k<imageCount; k++) {
                 // Applies convolution to the image with the filter
-                vector<vector<double> > image = convolve2Dpad(images[k], filter1);
-                image = convolve2Dpad(image, filter5);
+                vector<vector<double> > image = convolve2Dpad(images[k], filter1, cores);
+                image = convolve2Dpad(image, filter5, cores);
 
                 // Applies the function (sigmoid tanh) onto the neurons
                 vector<vector<double> > layer1 = convolve2D(image, initialWeights, cores);

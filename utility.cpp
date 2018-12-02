@@ -176,8 +176,11 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
     double product;
     int i, j;
     int threads = cores;
+    // We need the width (resultY) length (resultX) and the output to be accessible to all threads.
     #pragma omp parallel num_threads(threads) shared(resultY, resultX, result)
     {
+        // Each thread gets their own i, j, product to work with individually.
+        // Schedule dynamic so no threads will wait, also set it to resultX so less shared reading of same row.
         # pragma omp for private(i, j, product) schedule(dynamic, resultX)
         for (int a = 0; a < resultY * resultX; a++) {     // loop that builds the result rows and columns
             i = a / resultX;
@@ -236,7 +239,7 @@ vector<vector<double> > convolve2Dsequential(vector<vector<double> > image, vect
  * Acts like convolve2D() but the image is not reduced in size. Instead, it is padded by zeros.
  * Was made into a separate function for clarity purposes.
  */
-vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vector<double> > filter) {
+vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vector<double> > filter, int cores) {
     int imageY = image.size();
     int imageX = image[0].size();
     int filterY = filter.size();
@@ -247,10 +250,19 @@ vector<vector<double> > convolve2Dpad(vector<vector<double> > image, vector<vect
     double result[imageY][imageX];
 
     double product;
-    for (int i=0; i<imageY; i++) {
-        for (int j=0; j<imageX; j++) {
+    int i, j;
+    int threads = cores;
+    // We need the width (resultY) length (resultX) and the output to be accessible to all threads.
+    #pragma omp parallel num_threads(threads) shared(imageY, imageX, result)
+    {
+        // Each thread gets their own i, j, product to work with individually.
+        // Schedule dynamic so no threads will wait, also set it to resultX so less shared reading of same row.
+        # pragma omp for private(i, j, product) schedule(dynamic, imageX)
+        for (int a = 0; a < imageY * imageX; a++) {
+            i = a / imageX;
+            j = a % imageX;
             product = 0;
-            bool toPad = i < padY || i >= (imageY - padY) || j < padX || j >=(imageX - padX);
+            bool toPad = i < padY || i >= (imageY - padY) || j < padX || j >= (imageX - padX);
             // If we are not in the borders to pad with 0, we perform convolution normally.
             if (!toPad) {
                 for (int l = 0; l < filterY; l++) {     // these loops are the multiplication of the filter on the image
