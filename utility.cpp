@@ -163,7 +163,7 @@ vector<double> flatten2D (vector<vector<double> > elements) {
  * More specifically, a n x n portion of the image is taken and multiplied with the filter and summed up, and then
  * put into the result matrix. This happens across the entire image with the same filter.
  */
-vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<double> > filter) {
+vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<double> > filter, int cores) {
     int imageY = image.size();
     int imageX = image[0].size();
     int filterY = filter.size();
@@ -175,7 +175,7 @@ vector<vector<double> > convolve2D(vector<vector<double> > image, vector<vector<
 
     double product;
     int i, j;
-    int threads = 4;
+    int threads = cores;
     #pragma omp parallel num_threads(threads) shared(resultY, resultX, result)
     {
         # pragma omp for private(i, j, product) schedule(dynamic, resultX)

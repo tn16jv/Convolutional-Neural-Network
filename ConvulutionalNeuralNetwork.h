@@ -110,8 +110,9 @@ public:
             }
         }
 
-        finalWeights.resize(n*n);
-        for (int i=0; i<n*n; i++) {
+        int m = 4;
+        finalWeights.resize(m);
+        for (int i=0; i<m; i++) {
             finalWeights[i] = distribution(gen);    // randomly sample values from above normal distribution
         }
         //finalWeights = flatten2D(rotateVector(initialWeights));
@@ -139,7 +140,7 @@ public:
         }
     }
 
-    void train() {
+    void train(int cores) {
         vector<vector<double> > filter1 = read2DVector("identity");
         vector<vector<double> > filter2 = read2DVector("edge1");
         vector<vector<double> > filter3 = read2DVector("edge2");
@@ -154,7 +155,7 @@ public:
                 image = convolve2Dpad(image, filter5);
 
                 // Applies the function (sigmoid tanh) onto the neurons
-                vector<vector<double> > layer1 = convolve2D(image, initialWeights);
+                vector<vector<double> > layer1 = convolve2D(image, initialWeights, cores);
                 vector<double> layer1Vec = flatten2D(layer1);
                 vector<double> layer1ActVec = funcOnVector(tanh, layer1Vec);
 
@@ -178,7 +179,7 @@ public:
 
                 vector<vector<double> > gradient1Tmp = multiplyVectors(gradient1b, gradient1a);
                 vector<vector<double> > gradient1 = rotateVector(
-                        convolve2D(gradient1c, rotateVector(gradient1Tmp)));
+                        convolve2D(gradient1c, rotateVector(gradient1Tmp), cores));
 
                 // We have the derivatives and have finished 1 step. Adjust the weights and then repeat.
                 adaptWeights(gradient1, gradient2);
@@ -190,7 +191,7 @@ public:
         vector<double> output (imageCount);
 
         for (int i=0; i<imageCount; i++) {
-            vector<vector<double> > layer1 = convolve2D(images[i], initialWeights);
+            vector<vector<double> > layer1 = convolve2D(images[i], initialWeights, 4);
             vector<double> layer1Vec = flatten2D(layer1);
             vector<double> layer1ActVec = funcOnVector(tanh, layer1Vec);
 
@@ -206,7 +207,7 @@ public:
      * Gives an expected floating point value (0,1) for a given 2D vector representing an image.
      */
     double testAnImage(vector<vector<double> > anImage) {
-        vector<vector<double> > layer1 = convolve2D(anImage, initialWeights);
+        vector<vector<double> > layer1 = convolve2D(anImage, initialWeights, 4);
         vector<double> layer1Vec = flatten2D(layer1);
         vector<double> layer1ActVec = funcOnVector(tanh, layer1Vec);
 
