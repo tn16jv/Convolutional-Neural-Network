@@ -179,7 +179,7 @@ public:
 
                 vector<vector<double> > gradient1Tmp = multiplyVectors(gradient1b, gradient1a);
                 vector<vector<double> > gradient1 = rotateVector(
-                        convolve2D(gradient1c, rotateVector(gradient1Tmp), cores));
+                        convolve2D(gradient1c, rotateVector(gradient1Tmp), cores));f
 
                 // We have the derivatives and have finished 1 step. Adjust the weights and then repeat.
                 adaptWeights(gradient1, gradient2);
